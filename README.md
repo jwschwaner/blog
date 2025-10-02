@@ -59,33 +59,36 @@ RLS overview: Public read of published posts by org; all writes restricted to me
 9) Playwright e2e + GitHub Actions CI; Vercel deploy
 10) Custom domains and branding polish
 
-## Local Development (current status: pre‑scaffold)
-Planned steps to scaffold next:
+## Project Structure
+- web/ — Next.js application (TypeScript, App Router, Tailwind, ESLint)
+
+## Local Development (current status: scaffolded)
+Requirements: Node 18+, npm (or pnpm), Docker (optional), Supabase project
 
 ```powershell
-# Requirements: Node 18+, pnpm or npm, Docker (optional for local Postgres), Supabase project
+# Install deps
+npm --prefix .\web install
 
-# 1) Create Next.js app (TypeScript)
-npx create-next-app@latest . --ts
-
-# 2) Install core packages
-pnpm add @gluestack-ui/themed @gluestack-style/react @gluestack-ui/config
-pnpm add @supabase/supabase-js
-pnpm add -D tailwindcss postcss autoprefixer @types/node @types/react typescript eslint prettier
-
-# 3) Init Tailwind
-npx tailwindcss init -p
-
-# 4) Env variables (example placeholders)
-# Create .env.local with
-# NEXT_PUBLIC_SUPABASE_URL={{NEXT_PUBLIC_SUPABASE_URL}}
-# NEXT_PUBLIC_SUPABASE_ANON_KEY={{NEXT_PUBLIC_SUPABASE_ANON_KEY}}
-
-# 5) Run dev server
-pnpm dev
+# Run dev server
+npm --prefix .\web run dev
 ```
 
-Supabase schema and RLS will be added under a /supabase or /db directory with SQL files and a seed script.
+Environment variables
+```powershell
+# Create web/.env.local with placeholders (do not commit real secrets)
+@'
+NEXT_PUBLIC_SUPABASE_URL={{NEXT_PUBLIC_SUPABASE_URL}}
+NEXT_PUBLIC_SUPABASE_ANON_KEY={{NEXT_PUBLIC_SUPABASE_ANON_KEY}}
+'@ | Set-Content -NoNewline .\web\.env.local
+```
+
+Install additional packages (already executed)
+```powershell
+# Gluestack UI + Supabase client
+npm --prefix .\web install @gluestack-ui/themed @gluestack-style/react @gluestack-ui/config @supabase/supabase-js
+```
+
+Supabase schema and RLS will be added under /db with SQL files and a seed script.
 
 ## Contributing / Branching
 - main is protected; feature branches for work; PRs with concise descriptions
