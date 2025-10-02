@@ -1,4 +1,7 @@
+"use client";
+
 import Image from "next/image";
+import { Button, ButtonText } from "@gluestack-ui/themed";
 
 export default function Home() {
   return (
@@ -12,6 +15,9 @@ export default function Home() {
           height={38}
           priority
         />
+        <Button>
+          <ButtonText>Gluestack Button</ButtonText>
+        </Button>
         <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
           <li className="mb-2 tracking-[-.01em]">
             Get started by editing{" "}

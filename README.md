@@ -88,7 +88,17 @@ Install additional packages (already executed)
 npm --prefix .\web install @gluestack-ui/themed @gluestack-style/react @gluestack-ui/config @supabase/supabase-js
 ```
 
-Supabase schema and RLS will be added under /db with SQL files and a seed script.
+Supabase schema and RLS live under /db as SQL files.
+
+Apply the schema in Supabase
+- Open Supabase SQL editor
+- Paste and run db/schema.sql
+- Then paste and run db/policies.sql
+
+Environment setup
+- Copy web/.env.example to web/.env.local and fill in your Supabase project values
+  - NEXT_PUBLIC_SUPABASE_URL
+  - NEXT_PUBLIC_SUPABASE_ANON_KEY
 
 ## Contributing / Branching
 - main is protected; feature branches for work; PRs with concise descriptions
