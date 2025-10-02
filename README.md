@@ -1,64 +1,95 @@
-# Personal Blog (Next.js + TypeScript + Gluestack + Supabase)
+# Showcase Multi‑Tenant Blog Platform (Next.js + TypeScript + Gluestack + Supabase)
 
-A single-user personal blog built from scratch. The goal is full ownership over the stack and content, with a simple, fast authoring workflow and an admin-only UI.
+A portfolio‑grade, multi‑tenant blogging platform designed to demonstrate product thinking, backend fundamentals (RLS, multi‑tenant), solid UI/UX, and deployment best practices.
+
+This README is the single source of truth and should ALWAYS reflect the current direction and state of the project.
+
+## Goals
+- Multi‑tenant: multiple blogs (organizations) and users per blog
+- Professional polish: real RBAC, domain mapping, SEO, feeds, analytics, testing, CI/CD
+- Modern stack and DX: Next.js App Router, server actions, Gluestack UI, Supabase Auth + Postgres
 
 ## Tech Stack
 - Framework: Next.js (App Router)
 - Language: TypeScript
 - UI: Gluestack
-- Auth & DB: Supabase (PostgreSQL + Auth)
-- Styling: Tailwind CSS (planned) or Gluestack styling primitives
-- Deployment: Vercel or any Node-capable host (planned)
+- Auth & Database: Supabase (Auth + Postgres)
+- Styling: Tailwind CSS (with Gluestack styling primitives)
+- Deployment: Vercel (planned) + GitHub Actions CI
 
-## Core Requirements
-- Single user (admin = you). No multi-tenant blog support.
-- Create article feature (title, slug, content, cover image [optional], published flag, timestamps)
-- Tags feature (many-to-many with articles)
-- Category feature (one category per article)
-- Basic public pages: Home (list), Article detail, Category page, Tag page
-- Admin-only pages: Create/Edit Article, Manage Tags & Categories
+## Core Features (Planned)
+- Multi‑tenant structure: Organizations (blogs), Users, Memberships (Owner/Admin/Author/Viewer)
+- Content model: Posts, Categories, Tags, PostTags (many‑to‑many), Revisions, Drafts/Scheduled
+- Routing: Per‑blog subdomain (blogSlug.yourdomain.com) and custom domains; middleware resolves tenant by host
+- Auth & RBAC: Supabase Auth; RLS policies enforce org‑scoped reads/writes; public reads for published posts
+- Admin: Post editor (Markdown/MDX first), media management, theme/branding, domain management
+- Public: Home feed, post detail, category page, tag page, author page, search
+- SEO & Feeds: Sitemap, RSS/Atom/JSON feeds, Open Graph image generation
+- Quality: ESLint/Prettier, unit/integration tests, Playwright e2e, CI workflows
 
-## Planned Data Model (initial)
-- Article: id, title, slug, content, cover_image_url, published, category_id, created_at, updated_at
-- Category: id, name, slug
-- Tag: id, name, slug
-- ArticleTag: article_id, tag_id (junction)
+## Initial Data Model (High‑Level)
+- organizations: id, slug, name, branding_json, created_at
+- profiles: user_id, display_name, avatar_url, created_at (linked to Supabase auth users)
+- memberships: user_id, org_id, role (Owner/Admin/Author/Viewer)
+- posts: id, org_id, author_id, title, slug, content (Markdown/MDX), status (draft/published/scheduled),
+  published_at, updated_at, cover_image_url, category_id
+- categories: id, org_id, name, slug
+- tags: id, org_id, name, slug
+- post_tags: post_id, tag_id
+- revisions: id, post_id, version, content, created_by, created_at
+- domains: id, org_id, hostname, is_primary
 
-## High-Level Architecture
-- Next.js App Router with server components where possible
-- Supabase client for server-side data access (RLS policies to restrict writes to admin)
-- Minimal API routes for admin actions (if needed), else direct server actions
-- Gluestack for UI primitives and layout primitives
+RLS overview: Public read of published posts by org; all writes restricted to memberships with appropriate role.
 
-## MVP Milestones
-1) Scaffold Next.js + TypeScript project
-2) Install and configure Gluestack
-3) Set up Supabase project, tables, and RLS
-4) Implement public pages (home list, article detail)
-5) Implement admin auth (Supabase) and basic admin pages (create/edit)
-6) Add tags and category relationships to UI and queries
+## Architecture Overview
+- Tenant resolution: Middleware inspects Host header, finds org by domain or subdomain, attaches org to request context
+- Data access: Supabase server client; server actions for mutations; edge‑friendly where possible
+- Rendering: Server components by default; client components where interactivity is needed (editor, media picker)
+- Storage: Supabase Postgres + optional storage bucket for images
 
-## Local Setup (to do next)
-- Create Next.js app with TypeScript
-  - npx create-next-app@latest (select TypeScript)
-- Install dependencies
-  - gluestack, supabase-js, and any styling libs (e.g., Tailwind)
-- Configure Supabase
-  - Create project, set env vars locally (NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY)
-  - Create tables for Article, Category, Tag, ArticleTag
-  - Add RLS policies to allow public reads and admin-only writes
-- Run the dev server
-  - npm run dev or pnpm dev
+## Roadmap (MVP → Showcase)
+1) Repo bootstrap and docs (this commit)
+2) Scaffold Next.js + TypeScript project
+3) Add Gluestack UI + Tailwind
+4) Supabase schema + RLS + seed scripts
+5) Tenant middleware (domain/subdomain) and basic public pages
+6) Admin auth + minimal editor (Markdown) and post CRUD
+7) Categories, Tags, PostTags UI and queries
+8) Feeds (RSS/Atom/JSON), sitemap, OG image
+9) Playwright e2e + GitHub Actions CI; Vercel deploy
+10) Custom domains and branding polish
 
-## Scripts (to be completed once scaffolded)
-- dev: Start Next.js dev server
-- build: Build production bundle
-- start: Run production server
-- lint/test: Linting and tests (optional for now)
+## Local Development (current status: pre‑scaffold)
+Planned steps to scaffold next:
 
-## Notes
-- Keep first iteration simple: server actions for admin create/update, minimal WYSIWYG (or plain Markdown) to start.
-- Export content if needed later (e.g., JSON/Markdown) for portability.
+```powershell
+# Requirements: Node 18+, pnpm or npm, Docker (optional for local Postgres), Supabase project
+
+# 1) Create Next.js app (TypeScript)
+npx create-next-app@latest . --ts
+
+# 2) Install core packages
+pnpm add @gluestack-ui/themed @gluestack-style/react @gluestack-ui/config
+pnpm add @supabase/supabase-js
+pnpm add -D tailwindcss postcss autoprefixer @types/node @types/react typescript eslint prettier
+
+# 3) Init Tailwind
+npx tailwindcss init -p
+
+# 4) Env variables (example placeholders)
+# Create .env.local with
+# NEXT_PUBLIC_SUPABASE_URL={{NEXT_PUBLIC_SUPABASE_URL}}
+# NEXT_PUBLIC_SUPABASE_ANON_KEY={{NEXT_PUBLIC_SUPABASE_ANON_KEY}}
+
+# 5) Run dev server
+pnpm dev
+```
+
+Supabase schema and RLS will be added under a /supabase or /db directory with SQL files and a seed script.
+
+## Contributing / Branching
+- main is protected; feature branches for work; PRs with concise descriptions
+- Conventional commits (e.g., "feat:", "fix:", "docs:")
 
 ## License
 TBD
